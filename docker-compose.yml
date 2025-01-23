@@ -1,0 +1,12 @@
+services:
+  ai-microservice:
+    container_name: ai-microservice
+    build: ./server_ai/
+    env_file:
+      - ./server_ai/.env
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge

@@ -38,9 +38,7 @@ app.get<{
 
 app.listen({
   port: 3000,
-  host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1",
+  host: process.env.ENV === "dev" ? "127.0.0.1" : "0.0.0.0",
 });
-
-console.log(process.env.NODE_ENV);
 
 export default app;
