@@ -119,14 +119,14 @@ fetch first 1 rows only"
   |> pog.execute(db)
 }
 
-/// A row you get from running the `get_all_player` query
-/// defined in `./src/sql/get_all_player.sql`.
+/// A row you get from running the `get_all_players` query
+/// defined in `./src/sql/get_all_players.sql`.
 ///
 /// > 🐿️ This type definition was generated automatically using v3.0.0 of the
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
-pub type GetAllPlayerRow {
-  GetAllPlayerRow(
+pub type GetAllPlayersRow {
+  GetAllPlayersRow(
     player_id: String,
     name: String,
     fuel: Int,
@@ -136,13 +136,13 @@ pub type GetAllPlayerRow {
   )
 }
 
-/// Runs the `get_all_player` query
-/// defined in `./src/sql/get_all_player.sql`.
+/// Runs the `get_all_players` query
+/// defined in `./src/sql/get_all_players.sql`.
 ///
 /// > 🐿️ This function was generated automatically using v3.0.0 of
 /// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
-pub fn get_all_player(db) {
+pub fn get_all_players(db) {
   let decoder = {
     use player_id <- decode.field(0, decode.string)
     use name <- decode.field(1, decode.string)
@@ -151,7 +151,13 @@ pub fn get_all_player(db) {
     use iron <- decode.field(4, decode.int)
     use gold <- decode.field(5, decode.int)
     decode.success(
-      GetAllPlayerRow(player_id:, name:, fuel:, current_planet_id:, iron:, gold:,
+      GetAllPlayersRow(
+        player_id:,
+        name:,
+        fuel:,
+        current_planet_id:,
+        iron:,
+        gold:,
       ),
     )
   }

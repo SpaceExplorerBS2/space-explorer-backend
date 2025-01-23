@@ -4,7 +4,7 @@ import pog
 import sql
 import youid/uuid.{type Uuid}
 
-pub fn map_players(query_res: pog.Returned(sql.GetAllPlayerRow)) {
+pub fn map_players(query_res: pog.Returned(sql.GetAllPlayersRow)) {
   query_res.rows
   |> json.array(fn(x) {
     json.object([

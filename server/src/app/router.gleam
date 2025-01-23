@@ -1,3 +1,7 @@
+import app/handlers/planet as planet_handler
+import app/handlers/player as player_handler
+import app/jsons/planet as planet_jsons
+import app/jsons/player as player_jsons
 import app/web
 import envoy
 import gleam/erlang/os
@@ -12,39 +16,17 @@ import gleam/result
 import gleam/string
 import gleam/string_tree
 import pog
-
-import app/jsons/planet.{map_planet_by_id, map_planets}
-
 import sql
 import wisp.{type Request, type Response}
 import youid/uuid.{type Uuid}
 
-fn get_query_parameter(query, param) {
-  query
-  |> string.split("&")
-  |> list.map(string.split_once(_, "="))
-  |> list.map(fn(x) { result.map(x, fn(y) { #(string.lowercase(y.0), y.1) }) })
-  |> list.find(fn(x) {
-    case x {
-      Ok(#(pname, _)) if pname == param -> True
-      _ -> False
-    }
-  })
-  |> fn(x) {
-    case x {
-      Ok(a) -> a
-      Error(nil) -> Error(nil)
-    }
-  }
-}
-
 pub fn handle_request(req: Request, db) -> Response {
   use req <- web.middleware(req)
 
-  let get_planets_with_state = planets(_, db)
-  let get_planet_with_state = planet(_, db)
-  // let get_players_with_state = players(_, db)
-  // let get_player_with_state = player(_, db)
+  let get_planets_with_state = planet_handler.planets(_, db)
+  let get_planet_with_state = planet_handler.planets(_, db)
+  let get_players_with_state = player_handler.players(_, db)
+  //let get_player_with_state = player(_, db)
 
   // Wisp doesn't have a special router abstraction, instead we recommend using
   // regular old pattern matching. This is faster than a router, is type safe,
@@ -57,9 +39,9 @@ pub fn handle_request(req: Request, db) -> Response {
     // This matches `/comments`.
     ["planets"] -> get_planets_with_state(req)
     ["planet"] -> get_planet_with_state(req)
-    ["planets"] -> get_planets_with_state(req)
-    ["planet"] -> get_planet_with_state(req)
+    ["players"] -> get_players_with_state(req)
 
+    //["player"] -> get_planet_with_state(req)
     // This matches all other paths.
     _ -> wisp.not_found()
   }
@@ -73,62 +55,6 @@ fn home_page(req: Request) -> Response {
   let html = string_tree.from_string("FSpace-Backend")
   wisp.ok()
   |> wisp.html_body(html)
-}
-
-fn planets(req: Request, con) -> Response {
-  // This handler for `/comments` can respond to both GET and POST requests,
-  // so we pattern match on the method here.
-  case req.method {
-    Get -> get_planets(con)
-    //Post -> create_comment(req)
-    _ -> wisp.method_not_allowed([Get, Post])
-  }
-}
-
-fn planet(req: Request, con) -> Response {
-  // This handler for `/comments` can respond to both GET and POST requests,
-  // so we pattern match on the method here.
-  case req.method {
-    Get -> get_planet(con, req.query)
-    //Post -> create_comment(req)
-    _ -> wisp.method_not_allowed([Get, Post])
-  }
-}
-
-fn get_planets(con) -> Response {
-  // In a later example we'll show how to read from a database.
-  case sql.get_all_planets(con) {
-    Ok(res) -> wisp.response(200) |> wisp.json_body(map_planets(res))
-    Error(x) -> wisp.not_found()
-  }
-  // wisp.response(200)
-  // |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
-}
-
-fn get_planet_from_db(con, query) -> Result(sql.GetPlanetByIdRow, Nil) {
-  let assert Some(qr) = query
-  use #(_, planet_id) <- result.try(get_query_parameter(qr, "planetid"))
-  io.debug(planet_id)
-  use res <- result.try(
-    sql.get_planet_by_id(con, planet_id) |> result.map_error(fn(_) { Nil }),
-  )
-  list.first(res.rows)
-}
-
-fn get_planet(con, query: option.Option(String)) -> Response {
-  // In a later example we'll show how to read from a database.
-  let planet_json =
-    get_planet_from_db(con, query)
-    |> result.map(map_planet_by_id)
-
-  io.debug(planet_json)
-
-  case planet_json {
-    Ok(pj) -> wisp.response(200) |> wisp.json_body(pj)
-    Error(Nil) -> wisp.not_found()
-  }
-  // wisp.response(200)
-  // |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
 }
 
 fn create_comment(_req: Request) -> Response {

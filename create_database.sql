@@ -8,8 +8,8 @@ CREATE TABLE planets (
     gold INT DEFAULT 0 NOT NULL,                 -- Menge an Gold auf dem Planeten
     x INT DEFAULT 0 NOT NULL,
     y INT DEFAULT 0 NOT NULL,
-    rad INT DEFAULT 0 NOT NULL
-);
+    rad INT DEFAULT 0 NOT null
+); -- lölölö
 
 
 CREATE TABLE players (
@@ -17,6 +17,8 @@ CREATE TABLE players (
     name VARCHAR(100) NOT NULL,       -- Spielername
     fuel INT DEFAULT 100 NOT NULL,             -- Treibstoffbestand
     current_planet_id VARCHAR(50),    -- Aktueller Planet des Spielers (FK)
+    iron INT DEFAULT 0 NOT NULL,
+    gold INT DEFAULT 0 NOT NULL,
     FOREIGN KEY (current_planet_id) REFERENCES planets(planet_id)
 );
 

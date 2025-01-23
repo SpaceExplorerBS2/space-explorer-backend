@@ -1,5 +1,5 @@
 import app/gelpers.{get_query_parameter}
-import app/jsons/planet.{map_planet_by_id, map_planets}
+import app/jsons/player.{map_player_by_id, map_players}
 import app/web
 import envoy
 import gleam/erlang/os
@@ -18,30 +18,30 @@ import sql
 import wisp.{type Request, type Response}
 import youid/uuid.{type Uuid}
 
-pub fn planets(req: Request, con) -> Response {
+pub fn players(req: Request, con) -> Response {
   // This handler for `/comments` can respond to both GET and POST requests,
   // so we pattern match on the method here.
   case req.method {
-    Get -> get_planets(con)
+    Get -> get_players(con)
     //Post -> create_comment(req)
     _ -> wisp.method_not_allowed([Get, Post])
   }
 }
 
-pub fn planet(req: Request, con) -> Response {
-  // This handler for `/comments` can respond to both GET and POST requests,
-  // so we pattern match on the method here.
-  case req.method {
-    Get -> get_planet(con, req.query)
-    //Post -> create_comment(req)
-    _ -> wisp.method_not_allowed([Get, Post])
-  }
-}
+// pub fn planet(req: Request, con) -> Response {
+//   // This handler for `/comments` can respond to both GET and POST requests,
+//   // so we pattern match on the method here.
+//   case req.method {
+//     Get -> get_planet(con, req.query)
+//     //Post -> create_comment(req)
+//     _ -> wisp.method_not_allowed([Get, Post])
+//   }
+// }
 
-fn get_planets(con) -> Response {
+fn get_players(con) -> Response {
   // In a later example we'll show how to read from a database.
-  case sql.get_all_planets(con) {
-    Ok(res) -> wisp.response(200) |> wisp.json_body(map_planets(res))
+  case sql.get_all_players(con) {
+    Ok(res) -> wisp.response(200) |> wisp.json_body(map_players(res))
     Error(x) -> wisp.not_found()
   }
   // wisp.response(200)
@@ -57,19 +57,18 @@ fn get_planet_from_db(con, query) -> Result(sql.GetPlanetByIdRow, Nil) {
   )
   list.first(res.rows)
 }
+// fn get_planet(con, query: option.Option(String)) -> Response {
+//   // In a later example we'll show how to read from a database.
+//   let planet_json =
+//     get_planet_from_db(con, query)
+//     |> result.map(map_planet_by_id)
 
-fn get_planet(con, query: option.Option(String)) -> Response {
-  // In a later example we'll show how to read from a database.
-  let planet_json =
-    get_planet_from_db(con, query)
-    |> result.map(map_planet_by_id)
+//   io.debug(planet_json)
 
-  io.debug(planet_json)
-
-  case planet_json {
-    Ok(pj) -> wisp.response(200) |> wisp.json_body(pj)
-    Error(Nil) -> wisp.not_found()
-  }
-  // wisp.response(200)
-  // |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
-}
+//   case planet_json {
+//     Ok(pj) -> wisp.response(200) |> wisp.json_body(pj)
+//     Error(Nil) -> wisp.not_found()
+//   }
+//   // wisp.response(200)
+//   // |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
+// }
