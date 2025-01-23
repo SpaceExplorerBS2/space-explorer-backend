@@ -13,6 +13,8 @@ import gleam/string
 import gleam/string_tree
 import pog
 
+import app/jsons/planet.{map_planet_by_id, map_planets}
+
 import sql
 import wisp.{type Request, type Response}
 import youid/uuid.{type Uuid}
@@ -38,7 +40,7 @@ fn get_query_parameter(query, param) {
 
 pub fn handle_request(req: Request) -> Response {
   use req <- web.middleware(req)
-
+  io.debug("load env")
   let assert Ok(host) = envoy.get("DATABASE_HOST")
   let assert Ok(user) = envoy.get("DATABASE_USER")
   let assert Ok(database) = envoy.get("DATABASE")
@@ -104,25 +106,6 @@ fn planet(req: Request, con) -> Response {
     //Post -> create_comment(req)
     _ -> wisp.method_not_allowed([Get, Post])
   }
-}
-
-fn map_planets(query_res: pog.Returned(sql.GetAllPlanetsRow)) {
-  query_res.rows
-  |> json.array(fn(x) {
-    json.object([
-      #("id", json.string(x.planet_id)),
-      #("name", json.string(x.name)),
-    ])
-  })
-  |> json.to_string_tree
-}
-
-fn map_planet_by_id(query_res: sql.GetPlanetByIdRow) {
-  json.object([
-    #("id", json.string(query_res.planet_id)),
-    #("name", json.string(query_res.name)),
-  ])
-  |> json.to_string_tree
 }
 
 fn get_planets(con) -> Response {

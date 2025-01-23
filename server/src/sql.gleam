@@ -15,8 +15,11 @@ pub type GetPlanetByIdRow {
     hazards: Option(List(String)),
     silver: Option(Int),
     platinum: Option(Int),
-    iron: Option(Int),
-    gold: Option(Int),
+    iron: Int,
+    gold: Int,
+    x: Int,
+    y: Int,
+    rad: Int,
   )
 }
 
@@ -33,8 +36,11 @@ pub fn get_planet_by_id(db, arg_1) {
     use hazards <- decode.field(2, decode.optional(decode.list(decode.string)))
     use silver <- decode.field(3, decode.optional(decode.int))
     use platinum <- decode.field(4, decode.optional(decode.int))
-    use iron <- decode.field(5, decode.optional(decode.int))
-    use gold <- decode.field(6, decode.optional(decode.int))
+    use iron <- decode.field(5, decode.int)
+    use gold <- decode.field(6, decode.int)
+    use x <- decode.field(7, decode.int)
+    use y <- decode.field(8, decode.int)
+    use rad <- decode.field(9, decode.int)
     decode.success(
       GetPlanetByIdRow(
         planet_id:,
@@ -44,11 +50,14 @@ pub fn get_planet_by_id(db, arg_1) {
         platinum:,
         iron:,
         gold:,
+        x:,
+        y:,
+        rad:,
       ),
     )
   }
 
-  let query = "select * from planets 
+  let query = "select * from planets
 where planet_id = $1
 ORDER by planet_id
 fetch first 1 rows only"
@@ -72,8 +81,11 @@ pub type GetAllPlanetsRow {
     hazards: Option(List(String)),
     silver: Option(Int),
     platinum: Option(Int),
-    iron: Option(Int),
-    gold: Option(Int),
+    iron: Int,
+    gold: Int,
+    x: Int,
+    y: Int,
+    rad: Int,
   )
 }
 
@@ -90,8 +102,11 @@ pub fn get_all_planets(db) {
     use hazards <- decode.field(2, decode.optional(decode.list(decode.string)))
     use silver <- decode.field(3, decode.optional(decode.int))
     use platinum <- decode.field(4, decode.optional(decode.int))
-    use iron <- decode.field(5, decode.optional(decode.int))
-    use gold <- decode.field(6, decode.optional(decode.int))
+    use iron <- decode.field(5, decode.int)
+    use gold <- decode.field(6, decode.int)
+    use x <- decode.field(7, decode.int)
+    use y <- decode.field(8, decode.int)
+    use rad <- decode.field(9, decode.int)
     decode.success(
       GetAllPlanetsRow(
         planet_id:,
@@ -101,6 +116,9 @@ pub fn get_all_planets(db) {
         platinum:,
         iron:,
         gold:,
+        x:,
+        y:,
+        rad:,
       ),
     )
   }

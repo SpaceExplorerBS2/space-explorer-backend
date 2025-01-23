@@ -14,8 +14,11 @@ CREATE TABLE planets (
     hazards TEXT[] DEFAULT '{}',       -- Liste der Gefahren auf dem Planeten
     silver INT DEFAULT 0,              -- Menge an Silber auf dem Planeten
     platinum INT DEFAULT 0,            -- Menge an Platin auf dem Planeten
-    iron INT DEFAULT 0,                -- Menge an Eisen auf dem Planeten
-    gold INT DEFAULT 0                 -- Menge an Gold auf dem Planeten
+    iron INT DEFAULT 0 NOT NULL,                -- Menge an Eisen auf dem Planeten
+    gold INT DEFAULT 0 NOT NULL,                 -- Menge an Gold auf dem Planeten
+    x INT DEFAULT 0 NOT NULL,
+    y INT DEFAULT 0 NOT NULL,
+    rad INT DEFAULT 0 NOT NULL
 );
 
 
