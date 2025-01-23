@@ -8,7 +8,7 @@ pub fn map_planets(query_res: pog.Returned(sql.GetAllPlanetsRow)) {
   query_res.rows
   |> json.array(fn(x) {
     json.object([
-      #("id", json.string(x.planet_id)),
+      #("planetId", json.string(x.planet_id)),
       #("name", json.string(x.name)),
       #("hazards", case x.hazards {
         Some(hazards) -> json.array(hazards, json.string)
@@ -30,7 +30,7 @@ pub fn map_planet_by_id(query_res: sql.GetPlanetByIdRow) {
   query_res
   |> fn(x) {
     json.object([
-      #("id", json.string(x.planet_id)),
+      #("planetId", json.string(x.planet_id)),
       #("name", json.string(x.name)),
       #("hazards", case x.hazards {
         Some(hazards) -> json.array(hazards, json.string)

@@ -38,30 +38,13 @@ fn get_query_parameter(query, param) {
   }
 }
 
-pub fn handle_request(req: Request) -> Response {
+pub fn handle_request(req: Request, db) -> Response {
   use req <- web.middleware(req)
-  io.debug("load env")
-  let assert Ok(host) = envoy.get("DATABASE_HOST")
-  let assert Ok(user) = envoy.get("DATABASE_USER")
-  let assert Ok(database) = envoy.get("DATABASE")
-  let assert Ok(port) = envoy.get("DATABASE_PORT")
-  let assert Ok(password) = envoy.get("DATABASE_PASSWORD")
-  let assert Ok(port_int) = int.parse(port)
-
-  io.debug(#(user, password, host, port, database))
-
-  let db =
-    pog.default_config()
-    |> pog.host(host)
-    |> pog.database(database)
-    |> pog.user(user)
-    |> pog.port(port_int)
-    |> pog.password(option.Some(password))
-    |> pog.pool_size(15)
-    |> pog.connect
 
   let get_planets_with_state = planets(_, db)
   let get_planet_with_state = planet(_, db)
+  // let get_players_with_state = players(_, db)
+  // let get_player_with_state = player(_, db)
 
   // Wisp doesn't have a special router abstraction, instead we recommend using
   // regular old pattern matching. This is faster than a router, is type safe,
@@ -72,6 +55,8 @@ pub fn handle_request(req: Request) -> Response {
     [] -> home_page(req)
 
     // This matches `/comments`.
+    ["planets"] -> get_planets_with_state(req)
+    ["planet"] -> get_planet_with_state(req)
     ["planets"] -> get_planets_with_state(req)
     ["planet"] -> get_planet_with_state(req)
 

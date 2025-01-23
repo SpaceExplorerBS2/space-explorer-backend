@@ -12,8 +12,10 @@ pub type GetPlayerByIdRow {
   GetPlayerByIdRow(
     player_id: String,
     name: String,
-    fuel: Option(Int),
+    fuel: Int,
     current_planet_id: Option(String),
+    iron: Int,
+    gold: Int,
   )
 }
 
@@ -27,10 +29,19 @@ pub fn get_player_by_id(db, arg_1) {
   let decoder = {
     use player_id <- decode.field(0, decode.string)
     use name <- decode.field(1, decode.string)
-    use fuel <- decode.field(2, decode.optional(decode.int))
+    use fuel <- decode.field(2, decode.int)
     use current_planet_id <- decode.field(3, decode.optional(decode.string))
+    use iron <- decode.field(4, decode.int)
+    use gold <- decode.field(5, decode.int)
     decode.success(
-      GetPlayerByIdRow(player_id:, name:, fuel:, current_planet_id:),
+      GetPlayerByIdRow(
+        player_id:,
+        name:,
+        fuel:,
+        current_planet_id:,
+        iron:,
+        gold:,
+      ),
     )
   }
 
@@ -118,8 +129,10 @@ pub type GetAllPlayerRow {
   GetAllPlayerRow(
     player_id: String,
     name: String,
-    fuel: Option(Int),
+    fuel: Int,
     current_planet_id: Option(String),
+    iron: Int,
+    gold: Int,
   )
 }
 
@@ -133,9 +146,13 @@ pub fn get_all_player(db) {
   let decoder = {
     use player_id <- decode.field(0, decode.string)
     use name <- decode.field(1, decode.string)
-    use fuel <- decode.field(2, decode.optional(decode.int))
+    use fuel <- decode.field(2, decode.int)
     use current_planet_id <- decode.field(3, decode.optional(decode.string))
-    decode.success(GetAllPlayerRow(player_id:, name:, fuel:, current_planet_id:),
+    use iron <- decode.field(4, decode.int)
+    use gold <- decode.field(5, decode.int)
+    decode.success(
+      GetAllPlayerRow(player_id:, name:, fuel:, current_planet_id:, iron:, gold:,
+      ),
     )
   }
 
