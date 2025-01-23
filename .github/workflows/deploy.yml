@@ -15,5 +15,6 @@ jobs:
            key: ${{ secrets.SSH_PRIVATE_KEY }}
            port: ${{ secrets.REMOTE_PORT }}
            script: |
-             bash /mariosystems/space-explorer/backend/pull
-             bash /mariosystems/space-explorer/backend/restart
+             cd /mariosystems/space-explorer/backend
+             bash pull
+             bash restart
