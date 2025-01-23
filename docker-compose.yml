@@ -6,6 +6,10 @@ services:
       - ./server_ai/.env
     networks:
       - app
+  server:
+    env_file:
+      - ./server/.env
+    build: ./server/
 
 networks:
   app:
