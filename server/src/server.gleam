@@ -10,12 +10,10 @@ pub fn main() {
   wisp.configure_logger()
   let secret_key_base = wisp.random_string(64)
 
-  let connectionstring = "postgres://postgres:toor@localhost:5432/tttdb"
-
   let assert Ok(_) =
     wisp_mist.handler(router.handle_request, secret_key_base)
     |> mist.new
-    |> mist.port(8000)
+    |> mist.port(7211)
     |> mist.start_http
 
   process.sleep_forever()
