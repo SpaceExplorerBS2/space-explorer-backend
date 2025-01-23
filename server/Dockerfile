@@ -1,6 +1,6 @@
+ARG GLEAM_VERSION=v1.6.3
 
-
-FROM ghcr.io/gleam-lang/gleam:latest-erlang-alpine AS build
+FROM ghcr.io/gleam-lang/gleam:${GLEAM_VERSION}-erlang-alpine AS build
 
 COPY . /build/server
 
@@ -9,7 +9,7 @@ RUN cd /build/server \
   && gleam export erlang-shipment
 
 # Start from a clean slate
-FROM ghcr.io/gleam-lang/gleam:latest-erlang-alpine
+FROM ghcr.io/gleam-lang/gleam:${GLEAM_VERSION}-erlang-alpine
 
 # Copy the compiled star_bff code from the builder stage
 COPY --from=build /build/server/build/erlang-shipment /app
