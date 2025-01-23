@@ -12,7 +12,7 @@ services:
     build: ./server/
     networks:
       - app
-    expose:
+    ports:
       - 7211:7211
 
 networks:
