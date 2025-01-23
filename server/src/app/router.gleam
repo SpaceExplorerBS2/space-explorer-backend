@@ -48,6 +48,8 @@ pub fn handle_request(req: Request) -> Response {
   let assert Ok(password) = envoy.get("DATABASE_PASSWORD")
   let assert Ok(port_int) = int.parse(port)
 
+  io.debug(#(user, password, host, port, database))
+
   let db =
     pog.default_config()
     |> pog.host(host)

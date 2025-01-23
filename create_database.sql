@@ -1,13 +1,3 @@
--- 1. Datenbank erstellen
-CREATE DATABASE "SpaceGameDB";
-
--- 2. Mit der neu erstellten Datenbank verbinden (manuell)
-
-
--- 3. Schema "SpaceGame" erstellen
-CREATE SCHEMA IF NOT EXISTS "SpaceGame";
-
-
 CREATE TABLE planets (
     planet_id VARCHAR(50) PRIMARY KEY, -- Eindeutige Planeten-ID
     name VARCHAR(100) NOT NULL,        -- Name des Planeten
@@ -25,7 +15,7 @@ CREATE TABLE planets (
 CREATE TABLE players (
     player_id VARCHAR(50) PRIMARY KEY, -- Eindeutige Spieler-ID
     name VARCHAR(100) NOT NULL,       -- Spielername
-    fuel INT DEFAULT 100,             -- Treibstoffbestand
+    fuel INT DEFAULT 100 NOT NULL,             -- Treibstoffbestand
     current_planet_id VARCHAR(50),    -- Aktueller Planet des Spielers (FK)
     FOREIGN KEY (current_planet_id) REFERENCES planets(planet_id)
 );
