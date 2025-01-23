@@ -1,30 +1,62 @@
 import app/web
+import envoy
+import gleam/erlang/os
 import gleam/http.{Get, Post}
+import gleam/http/response
+import gleam/int
+import gleam/io
 import gleam/json
 import gleam/list
-import gleam/option
+import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/string
 import gleam/string_tree
 import pog
 
-// import sql
+import sql
 import wisp.{type Request, type Response}
 import youid/uuid.{type Uuid}
+
+fn get_query_parameter(query, param) {
+  query
+  |> string.split("&")
+  |> list.map(string.split_once(_, "="))
+  |> list.find(fn(x) {
+    case x {
+      Ok(#(pname, _)) if pname == param -> True
+      _ -> False
+    }
+  })
+  |> fn(x) {
+    case x {
+      Ok(a) -> a
+      Error(nil) -> Error(nil)
+    }
+  }
+}
 
 pub fn handle_request(req: Request) -> Response {
   use req <- web.middleware(req)
 
-  let connectionstring = "postgres://postgres:toor@localhost:5432/tttdb"
+  let assert Ok(host) = envoy.get("DATABASE_HOST")
+  let assert Ok(user) = envoy.get("DATABASE_USER")
+  let assert Ok(database) = envoy.get("DATABASE")
+  let assert Ok(port) = envoy.get("DATABASE_PORT")
+  let assert Ok(password) = envoy.get("DATABASE_PASSWORD")
+  let assert Ok(port_int) = int.parse(port)
+
   let db =
     pog.default_config()
-    |> pog.host("localhost")
-    |> pog.database("ttt_back")
-    |> pog.user("postgres")
-    |> pog.password(option.Some("toor"))
+    |> pog.host(host)
+    |> pog.database(database)
+    |> pog.user(user)
+    |> pog.port(port_int)
+    |> pog.password(option.Some(password))
     |> pog.pool_size(15)
     |> pog.connect
 
-  let games_state = games(_, db)
+  let get_planets_with_state = planets(_, db)
+  let get_planet_with_state = planet(_, db)
 
   // Wisp doesn't have a special router abstraction, instead we recommend using
   // regular old pattern matching. This is faster than a router, is type safe,
@@ -35,7 +67,8 @@ pub fn handle_request(req: Request) -> Response {
     [] -> home_page(req)
 
     // This matches `/comments`.
-    ["games"] -> games_state(req)
+    ["planets"] -> get_planets_with_state(req)
+    ["planet"] -> get_planet_with_state(req)
 
     // This matches all other paths.
     _ -> wisp.not_found()
@@ -52,36 +85,76 @@ fn home_page(req: Request) -> Response {
   |> wisp.html_body(html)
 }
 
-fn games(req: Request, con) -> Response {
+fn planets(req: Request, con) -> Response {
   // This handler for `/comments` can respond to both GET and POST requests,
   // so we pattern match on the method here.
   case req.method {
-    Get -> get_games(con)
-    Post -> create_comment(req)
+    Get -> get_planets(con)
+    //Post -> create_comment(req)
     _ -> wisp.method_not_allowed([Get, Post])
   }
 }
 
-// fn map_games(query_res: pog.Returned(sql.SelectAllGamesRow)) {
-//   query_res.rows
-//   |> json.array(fn(e) {
-//     json.object([
-//       #("id", case e.id {
-//         option.Some(x) -> json.string(uuid.to_string(x))
-//         option.None -> json.null()
-//       }),
-//     ])
-//   })
-// }
+fn planet(req: Request, con) -> Response {
+  // This handler for `/comments` can respond to both GET and POST requests,
+  // so we pattern match on the method here.
+  case req.method {
+    Get -> get_planet(con, req.query)
+    //Post -> create_comment(req)
+    _ -> wisp.method_not_allowed([Get, Post])
+  }
+}
 
-fn get_games(con) -> Response {
+fn map_planets(query_res: pog.Returned(sql.GetAllPlanetsRow)) {
+  query_res.rows
+  |> json.array(fn(x) {
+    json.object([
+      #("id", json.string(x.planet_id)),
+      #("name", json.string(x.name)),
+    ])
+  })
+  |> json.to_string_tree
+}
+
+fn map_planet_by_id(query_res: sql.GetPlanetByIdRow) {
+  json.object([
+    #("id", json.string(query_res.planet_id)),
+    #("name", json.string(query_res.name)),
+  ])
+  |> json.to_string_tree
+}
+
+fn get_planets(con) -> Response {
   // In a later example we'll show how to read from a database.
-  // case sql.select_all_games(con) {
-  //   Ok(res) -> wisp.json_body(string_tree.from_string(map_games(res)))
-  //   Error(x) -> wisp.not_found()
-  // }
-  wisp.response(200)
-  |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
+  case sql.get_all_planets(con) {
+    Ok(res) -> wisp.response(200) |> wisp.json_body(map_planets(res))
+    Error(x) -> wisp.not_found()
+  }
+  // wisp.response(200)
+  // |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
+}
+
+fn get_planet_from_db(con, query) -> Result(sql.GetPlanetByIdRow, Nil) {
+  let assert Some(qr) = query
+  use #(_, planet_id) <- result.try(get_query_parameter(qr, "planetId"))
+  use res <- result.try(
+    sql.get_planet_by_id(con, planet_id) |> result.map_error(fn(_) { Nil }),
+  )
+  list.first(res.rows)
+}
+
+fn get_planet(con, query: option.Option(String)) -> Response {
+  // In a later example we'll show how to read from a database.
+  let planet_json =
+    get_planet_from_db(con, query)
+    |> result.map(map_planet_by_id)
+
+  case planet_json {
+    Ok(pj) -> wisp.response(200) |> wisp.json_body(pj)
+    Error(Nil) -> wisp.not_found()
+  }
+  // wisp.response(200)
+  // |> wisp.json_body(string_tree.from_string("{fuck:\"space\"}"))
 }
 
 fn create_comment(_req: Request) -> Response {
