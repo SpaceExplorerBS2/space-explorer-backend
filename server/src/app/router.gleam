@@ -21,6 +21,7 @@ fn get_query_parameter(query, param) {
   query
   |> string.split("&")
   |> list.map(string.split_once(_, "="))
+  |> list.map(fn(x) { result.map(x, fn(y) { #(string.lowercase(y.0), y.1) }) })
   |> list.find(fn(x) {
     case x {
       Ok(#(pname, _)) if pname == param -> True
@@ -136,7 +137,8 @@ fn get_planets(con) -> Response {
 
 fn get_planet_from_db(con, query) -> Result(sql.GetPlanetByIdRow, Nil) {
   let assert Some(qr) = query
-  use #(_, planet_id) <- result.try(get_query_parameter(qr, "planetId"))
+  use #(_, planet_id) <- result.try(get_query_parameter(qr, "planetid"))
+  io.debug(planet_id)
   use res <- result.try(
     sql.get_planet_by_id(con, planet_id) |> result.map_error(fn(_) { Nil }),
   )
@@ -148,6 +150,8 @@ fn get_planet(con, query: option.Option(String)) -> Response {
   let planet_json =
     get_planet_from_db(con, query)
     |> result.map(map_planet_by_id)
+
+  io.debug(planet_json)
 
   case planet_json {
     Ok(pj) -> wisp.response(200) |> wisp.json_body(pj)
