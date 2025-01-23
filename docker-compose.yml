@@ -10,6 +10,10 @@ services:
     env_file:
       - ./server/.env
     build: ./server/
+    networks:
+      - app
+    expose:
+      - 7211:7211
 
 networks:
   app:
