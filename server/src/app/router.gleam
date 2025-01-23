@@ -24,7 +24,7 @@ pub fn handle_request(req: Request, db) -> Response {
   use req <- web.middleware(req)
 
   let get_planets_with_state = planet_handler.planets(_, db)
-  let get_planet_with_state = planet_handler.planets(_, db)
+  let get_planet_with_state = planet_handler.planet(_, db)
   let get_players_with_state = player_handler.players(_, db)
   //let get_player_with_state = player(_, db)
 
